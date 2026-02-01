@@ -233,7 +233,7 @@ namespace AktualizatorEME
                 {
                     MessageBox.Show("Najpierw wybierz profil w Managerze!", "Brak profilu", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
-            }
+                }
 
                 // 2. UI: Zmiana tekstu i blokada
                 PlayButton.Content = "URUCHAMIANIE...";
@@ -250,7 +250,7 @@ namespace AktualizatorEME
                     SetUIEnabled(true);
                     PlayButton.Content = "URUCHOM GRĘ";
                     return;
-            }
+                }
 
                 // 4. LOGIKA JSON: Wstrzykiwanie profilu do gry
                 _logger.LogMessage("Synchronizacja profilu z ClassicUO...");
@@ -264,23 +264,26 @@ namespace AktualizatorEME
                     if (mySettings == null)
                     {
                         _logger.LogMessage("BŁĄD: Nie udało się odczytać profilu.");
+                        SetUIEnabled(true);
+                        PlayButton.Content = "URUCHOM GRĘ";
                         return;
                     }
 
-                    // B. Diagnostyka - Sprawdzamy co siedzi w zmiennej
-                    string passToConvert = mySettings.Password ?? "";
-                    _logger.LogMessage($"DIAGNOSTYKA: Hasło w RAM: '{passToConvert}' (Długość: {passToConvert.Length})");
+                    // 1. NAJPIERW deszyfrujemy hasło z formatu profilu (.json) do czystego tekstu
+                    string decryptedPass = PasswordVault.Decrypt(mySettings.Password);
 
-                    // C. Edytujemy settings.json gry
+                    // 2. POTEM zamieniamy czysty tekst na format HEX wymagany przez grę
+                    string passForGame = PasswordVault.ToClassicUOPassword(decryptedPass);
+
+                    // B. Edytujemy settings.json gry
                     if (File.Exists(gameSettingsPath))
                     {
                         var gameJsonRaw = File.ReadAllText(gameSettingsPath);
-                        JObject gameConfig = JObject.Parse(gameJsonRaw); // <--- TUTAJ tworzymy gameConfig
+                        JObject gameConfig = JObject.Parse(gameJsonRaw);
 
-                        // Nadpisujemy dane
+                        // Wstrzykujemy dane
                         gameConfig["username"] = mySettings.Username;
-                        gameConfig["password"] = PasswordVault.ToClassicUOPassword(passToConvert);
-        
+                        gameConfig["password"] = passForGame; // <--- Tutaj trafia HEX 1-XXXX
                         gameConfig["ip"] = mySettings.Ip;
                         gameConfig["port"] = mySettings.Port;
                         gameConfig["ultimaonlinedirectory"] = mySettings.UltimaOnlineDirectory;
@@ -289,7 +292,7 @@ namespace AktualizatorEME
                         gameConfig["login_music"] = mySettings.LoginMusic;
                         gameConfig["login_music_volume"] = mySettings.LoginMusicVolume;
 
-                        // D. Zapisujemy zmiany na dysk
+                        // C. Zapisujemy zmiany na dysk gry
                         File.WriteAllText(gameSettingsPath, gameConfig.ToString(Formatting.Indented));
                         _logger.LogMessage("Ustawienia zsynchronizowane.");
                     }

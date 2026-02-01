@@ -28,8 +28,8 @@ namespace AktualizatorEME
                     ProfileNameBox.Text = Path.GetFileNameWithoutExtension(filePath);
                     LoginBox.Text = settings.Username;
             
-                    // Hasło deszyfrujemy (pamiętaj, że w Save_Click je szyfrowaliśmy!)
-                    PassBox.Password = settings.Password;
+                    // Hasło deszyfrujemy
+                    PassBox.Password = PasswordVault.Decrypt(settings.Password);
             
                     PathBox.Text = settings.UltimaOnlineDirectory;
                     IpBox.Text = settings.Ip;
@@ -128,7 +128,7 @@ namespace AktualizatorEME
                 var settings = new SettingsModel
                 {
                     Username = LoginBox.Text,
-                    Password = PassBox.Password, // Zapisujemy czysty tekst
+                    Password = PasswordVault.Encrypt(PassBox.Password), // Szyfrujemy hasło przed zapisem do JSONa
                     Ip = IpBox.Text,
                     Port = portValue,
                     UltimaOnlineDirectory = PathBox.Text,

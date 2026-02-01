@@ -1,0 +1,145 @@
+<Window x:Class="AktualizatorEME.ProfileEditWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Edycja Profilu" Height="600" Width="400" 
+        WindowStyle="None" AllowsTransparency="True" Background="#111111">
+    
+    <Border BorderBrush="#333333" BorderThickness="1">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="20">
+                <Grid Margin="0,0,0,10">
+                    <TextBlock Text="EDYCJA PROFILU" Foreground="White" FontSize="20" FontWeight="Bold"/>
+                    <CheckBox x:Name="DevModeCheck" Content="DEVELOPER MODE" HorizontalAlignment="Right" Foreground="Orange" FontWeight="Bold" VerticalAlignment="Center"/>
+                </Grid>
+
+                <TextBlock Text="1. INFORMACJE" Foreground="#ff7e00" FontWeight="Bold" Margin="0,0,0,5"/>
+                <Grid Margin="0,0,0,10">
+                    <TextBox x:Name="ProfileNameBox" Background="#222" Foreground="White" Height="25" VerticalContentAlignment="Center" Padding="2,0"/>
+                    <TextBlock Text="Wpisz nazwę profilu..." Foreground="#555" IsHitTestVisible="False" VerticalAlignment="Center" Margin="10,0,0,0">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Text, ElementName=ProfileNameBox}" Value="">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Grid>
+                <TextBlock Text="2. ŚCIEŻKA GRY" Foreground="#ff7e00" FontWeight="Bold" Margin="0,0,0,5"/>
+                <Grid Margin="0,0,0,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid Grid.Column="0">
+                        <TextBox x:Name="PathBox" Background="#222" Foreground="White" Height="25" VerticalContentAlignment="Center" Padding="2,0"/>
+                        <TextBlock Text="Wpisz ścieżkę do gry..." Foreground="#555" IsHitTestVisible="False" VerticalAlignment="Center" Margin="10,0,0,0">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Text, ElementName=PathBox}" Value="">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
+                    <Button Grid.Column="1" Content="PRZEGLĄDAJ" Width="100" Margin="5,0,0,0" Click="BrowsePath_Click"/>
+                </Grid>
+                <!--
+                Grid Margin="0,0,0,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="ClassicUOPathBox" Text="C:\Gry\Endore\ClassicUO" Background="#222" Foreground="White" Height="25" VerticalContentAlignment="Center" Padding="2,0"/>
+                    <Button Grid.Column="1" Content="PRZEGLĄDAJ" Width="100" Margin="5,0,0,0" Click="BrowseCUOExe_Click"/>
+                </Grid>
+                -->
+                <TextBlock x:Name="ClientVersionText" Text="Wersja klienta: 7.0.40.0" Foreground="#555" Margin="0,0,0,15"/>
+
+                <TextBlock Text="3. POŁĄCZENIE Z SERWEREM" Foreground="#ff7e00" FontWeight="Bold" Margin="0,0,0,5"/>
+                <UniformGrid Columns="2" Margin="0,0,0,10">
+                    <StackPanel Margin="0,0,5,0">
+                        <TextBlock Text="Login:" Foreground="#888888"/>
+                        <TextBox x:Name="LoginBox" Background="#222" Foreground="White" Margin="0,5,0,15" Height="25" VerticalContentAlignment="Center" Padding="2,0"/>
+                    </StackPanel>
+                    <StackPanel Margin="5,0,0,0">
+                        <TextBlock Text="Hasło:" Foreground="#888888"/>
+                        <Grid Height="25" Margin="0,5,0,15">
+                            <PasswordBox x:Name="PassBox" Background="#222" Foreground="White" Height="25" VerticalContentAlignment="Center" Padding="2,0,30,0"/>
+
+                            <TextBox x:Name="PassVisibleBox" Background="#222" Foreground="White" Height="25" VerticalContentAlignment="Center" Padding="2,0,30,0" Visibility="Collapsed"/>
+
+                            <Button x:Name="ShowPassBtn" Content="👁" 
+                                    Width="20" Height="20" 
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    Margin="0,0,5,0"
+                                    Background="Transparent" BorderThickness="0" 
+                                    Foreground="#888888" Cursor="Hand"
+                                    PreviewMouseDown="ShowPassBtn_PreviewMouseDown" 
+                                    PreviewMouseUp="ShowPassBtn_PreviewMouseUp">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                        </Grid>
+                    </StackPanel>
+                </UniformGrid>
+                
+                <Grid Margin="0,0,0,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="3*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Margin="0,0,5,0">
+                        <TextBlock Text="Adres serwera:" Foreground="#888888"/>
+                        <TextBox x:Name="IpBox" Text="server.endore.pl" Background="#222" Foreground="White" Margin="0,5,0,15" Height="25" VerticalContentAlignment="Center" Padding="2,0"  
+                                 IsEnabled="{Binding IsChecked, ElementName=DevModeCheck}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Margin="5,0,0,0">
+                        <TextBlock Text="Port:" Foreground="#888888"/>
+                        <TextBox x:Name="PortBox" Text="4003" Background="#222" Foreground="White" Margin="0,5,0,15" Height="25" VerticalContentAlignment="Center" Padding="2,0"
+                                 IsEnabled="{Binding IsChecked, ElementName=DevModeCheck}"/>
+                    </StackPanel>
+                </Grid>
+                <!--
+                <TextBlock Text="Imię postaci (opcjonalne):" Foreground="#888888"/>
+                <TextBox Background="#222" Foreground="White" Margin="0,5,0,15" Height="25" VerticalContentAlignment="Center" Padding="2,0"/>
+                -->
+                <TextBlock Text="4. OPCJE DODATKOWE" Foreground="#ff7e00" FontWeight="Bold" Margin="0,0,0,10"/>
+                <UniformGrid Columns="2">
+                    <CheckBox x:Name="SkipLoginCheck" Content="Pomiń ekran logowania" Foreground="White" Margin="0,0,0,5"/>
+                    <CheckBox x:Name="AutoLoginCheck" Content="Automatyczne logowanie" Foreground="White"/>
+                    <CheckBox x:Name="ReconnectCheck" Content="Auto. ponawianie połączenia" Foreground="White" Margin="0,0,0,5"/>
+                    <CheckBox x:Name="LoginMusicCheck" Content="Włącz muzykę ekranu logowania" Foreground="White"/>
+                </UniformGrid>
+                
+                <StackPanel Orientation="Horizontal" Margin="0,15,0,5">
+                    <TextBlock Text="Głośność muzyki" Foreground="#888888"/>
+                    <TextBlock Text="{Binding Value, ElementName=MusicSlider, StringFormat=': {0:0}%'}" 
+                               Foreground="#ff7e00" 
+                               FontWeight="Bold" 
+                               Margin="5,0,0,0"/>
+                </StackPanel>
+
+                <Slider x:Name="MusicSlider" Minimum="0" Maximum="100" Value="50" IsSnapToTickEnabled="True" TickFrequency="1" Margin="0,0,0,20"/>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="ANULUJ" Width="100" Margin="5,0" Click="Cancel_Click"/>
+                    <Button Content="ZAPISZ ZMIANY" Width="150" Margin="5,0" FontWeight="Bold" Click="Save_Click"/>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+    </Border>
+</Window>

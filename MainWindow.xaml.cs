@@ -238,6 +238,24 @@ namespace AktualizatorEME
                 // Zapisujemy ścieżkę do wybranego profilu, żeby przycisk GRAJ wiedział co odpalić
                 _selectedProfilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Profiles", $"{chosenProfile}.json");
         
+                try 
+                {
+                    if (File.Exists(_selectedProfilePath))
+                    {
+                        string json = File.ReadAllText(_selectedProfilePath);
+                        var settings = JsonConvert.DeserializeObject<SettingsModel>(json);
+                
+                        // Pokazujemy lub chowamy pomarańczowy znaczek
+                        DevBadge.Visibility = (settings != null && settings.IsDev) 
+                                              ? Visibility.Visible 
+                                              : Visibility.Collapsed;
+                    }
+                }
+                catch 
+                {
+                    DevBadge.Visibility = Visibility.Collapsed;
+                }
+
                 _logger.LogMessage($"Aktywowano profil: {chosenProfile}");
             }
         }

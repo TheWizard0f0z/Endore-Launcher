@@ -134,7 +134,18 @@
                     <Grid>
                         <StackPanel VerticalAlignment="Center" Margin="10">
                             <TextBlock Text="AKTUALNY PROFIL" Foreground="#555555" FontSize="10" FontWeight="Bold"/>
-                            <TextBlock x:Name="CurrentProfileName" Text="Profil Domyślny" Foreground="White" FontSize="16" FontWeight="Bold"/>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock x:Name="CurrentProfileName" Text="Profil Domyślny" Foreground="White" FontSize="16" FontWeight="Bold" VerticalAlignment="Center"/>
+                                <Border x:Name="DevBadge" 
+                                        Background="Orange" 
+                                        Width="35" Height="18" 
+                                        CornerRadius="2" 
+                                        Margin="8,0,0,0" 
+                                        Visibility="Collapsed"
+                                        VerticalAlignment="Center">
+                                    <TextBlock Text="DEV" Foreground="Black" FontWeight="Bold" FontSize="9" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </StackPanel>
                         </StackPanel>
                         <Button Content="ZMIEŃ" HorizontalAlignment="Right" Width="70" Height="25" 
                                 FontSize="10" Padding="0" Click="OpenProfileManager_Click" VerticalAlignment="Center" Margin="10"/>

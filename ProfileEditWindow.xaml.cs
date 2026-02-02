@@ -155,6 +155,12 @@ namespace AktualizatorEME
         {
             try 
             {
+                // 1. Walidacja pól
+                if (!ValidateForm())
+                {
+                    return; // Przerwij zapis, jeśli walidacja nie przeszła
+                }
+
                 int portValue;
                 if (!int.TryParse(PortBox.Text, out portValue)) 
                 {
@@ -175,12 +181,13 @@ namespace AktualizatorEME
                     Reconnect = ReconnectCheck.IsChecked ?? false,
                     LoginMusic = LoginMusicCheck.IsChecked ?? false,
                     LoginMusicVolume = (int)MusicSlider.Value,
-                    IsDev = DevModeCheck.IsChecked ?? false // ZAPISUJEMY FLAGĘ
+                    IsDev = DevModeCheck.IsChecked ?? false 
                 };
 
                 string json = JsonConvert.SerializeObject(settings, Formatting.Indented);
                 string profilesFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Profiles");
                 Directory.CreateDirectory(profilesFolder);
+        
                 string safeName = string.Join("_", ProfileNameBox.Text.Split(Path.GetInvalidFileNameChars()));
                 string filePath = Path.Combine(profilesFolder, $"{safeName}.json");
 
@@ -189,6 +196,28 @@ namespace AktualizatorEME
                 this.DialogResult = true;
             }
             catch (Exception ex) { MessageBox.Show($"Błąd zapisu: {ex.Message}"); }
+        }
+
+        private bool ValidateForm()
+        {
+            System.Collections.Generic.List<string> errors = new System.Collections.Generic.List<string>();
+
+            if (string.IsNullOrWhiteSpace(ProfileNameBox.Text)) errors.Add("- Nazwa profilu");
+            if (string.IsNullOrWhiteSpace(PathBox.Text)) errors.Add("- Ścieżka do gry");
+            if (string.IsNullOrWhiteSpace(ClientVersionBox.Text)) errors.Add("- Wersja klienta");
+            if (string.IsNullOrWhiteSpace(LoginBox.Text)) errors.Add("- Login");
+            if (string.IsNullOrWhiteSpace(PassBox.Password)) errors.Add("- Hasło");
+            if (string.IsNullOrWhiteSpace(IpBox.Text)) errors.Add("- Adres serwera");
+            if (string.IsNullOrWhiteSpace(PortBox.Text)) errors.Add("- Port");
+
+            if (errors.Count > 0)
+            {
+                string message = "Aby zapisać profil, uzupełnij następujące pola:\n" + string.Join("\n", errors);
+                MessageBox.Show(message, "Brakujące dane", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
+
+            return true;
         }
     }
 }

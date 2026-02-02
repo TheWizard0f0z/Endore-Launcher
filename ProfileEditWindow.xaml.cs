@@ -54,7 +54,16 @@ namespace AktualizatorEME
                     ReconnectCheck.IsChecked = settings.Reconnect;
                     LoginMusicCheck.IsChecked = settings.LoginMusic;
                     MusicSlider.Value = settings.LoginMusicVolume;
-                    ProfileNameBox.IsEnabled = false; 
+                    ProfileNameBox.IsEnabled = false;
+
+                    if (settings.Plugins != null && settings.Plugins.Count > 0)
+                    {
+                        PluginPathBox.Text = settings.Plugins[0];
+                    }
+                    else
+                    {
+                        PluginPathBox.Text = "";
+                    }
                 }
             }
             catch (Exception ex) { MessageBox.Show($"Błąd wczytywania: {ex.Message}"); }
@@ -149,6 +158,23 @@ namespace AktualizatorEME
             }
         }
 
+        private void BrowsePlugin_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new CommonOpenFileDialog
+            {
+                IsFolderPicker = false,
+                Title = "Wybierz plik wykonywalny pluginu",
+                InitialDirectory = string.IsNullOrEmpty(PathBox.Text) ? "C:\\" : PathBox.Text
+            };
+            dialog.Filters.Add(new CommonFileDialogFilter("Pliki wykonywalne", "*.exe"));
+
+            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                // Wpisujemy kompletną ścieżkę zwróconą przez dialog
+                PluginPathBox.Text = dialog.FileName;
+            }
+        }
+
         private void Cancel_Click(object sender, RoutedEventArgs e) => Close();
 
         private void Save_Click(object sender, RoutedEventArgs e)
@@ -181,6 +207,9 @@ namespace AktualizatorEME
                     Reconnect = ReconnectCheck.IsChecked ?? false,
                     LoginMusic = LoginMusicCheck.IsChecked ?? false,
                     LoginMusicVolume = (int)MusicSlider.Value,
+                    Plugins = string.IsNullOrWhiteSpace(PluginPathBox.Text) 
+                              ? new System.Collections.Generic.List<string>() 
+                              : new System.Collections.Generic.List<string> { PluginPathBox.Text },
                     IsDev = DevModeCheck.IsChecked ?? false 
                 };
 

@@ -247,102 +247,90 @@ namespace AktualizatorEME
         {
             try
             {
-                // 1. Sprawdzenie ścieżki i profilu
-                string gameBaseDir = _configService.GamePath;
-                if (string.IsNullOrEmpty(gameBaseDir) || !Directory.Exists(gameBaseDir))
-                {
-                    _logger.LogMessage("Błąd: Nie ustawiono ścieżki gry.");
-                    return;
-                }
-
+                // 1. Sprawdzenie profilu
                 if (string.IsNullOrEmpty(_selectedProfilePath) || !File.Exists(_selectedProfilePath))
                 {
                     MessageBox.Show("Najpierw wybierz profil w Managerze!", "Brak profilu", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
-                // 2. UI: Zmiana tekstu i blokada
+                // 2. Pobieramy dane z naszego profilu (TU JEST KLUCZ DO TWOJEGO PROBLEMU)
+                string rawProfileJson = File.ReadAllText(_selectedProfilePath);
+                var mySettings = JsonConvert.DeserializeObject<SettingsModel>(rawProfileJson);
+
+                if (mySettings == null || string.IsNullOrEmpty(mySettings.UltimaOnlineDirectory))
+                {
+                    _logger.LogMessage("BŁĄD: Profil jest pusty lub nie ma ustawionej ścieżki gry.");
+                    return;
+                }
+
+                // UWAGA: Teraz używamy ścieżki Z PROFILU (mySettings.UltimaOnlineDirectory)
+                // a nie globalnej ścieżki launchera (_configService.GamePath)
+                string gameBaseDir = mySettings.UltimaOnlineDirectory; 
+        
+                // 3. UI: Zmiana tekstu i blokada
                 PlayButton.Content = "URUCHAMIANIE...";
                 SetUIEnabled(false);
-                await Task.Delay(500); // Sztuczne opóźnienie dla UX
+                await Task.Delay(500);
 
-                // 3. Ścieżki do plików
+                // 4. Ścieżki do plików
                 string exePath = Path.Combine(gameBaseDir, "ClassicUO", "ClassicUO.exe");
                 string gameSettingsPath = Path.Combine(gameBaseDir, "ClassicUO", "settings.json");
 
                 if (!File.Exists(exePath))
                 {
-                    _logger.LogMessage("BŁĄD: Nie znaleziono ClassicUO.exe!");
+                    _logger.LogMessage($"BŁĄD: Nie znaleziono ClassicUO.exe w {exePath}!");
                     SetUIEnabled(true);
                     PlayButton.Content = "URUCHOM GRĘ";
                     return;
                 }
 
-                // 4. LOGIKA JSON: Wstrzykiwanie profilu do gry
+                // 5. Synchronizacja JSON
                 _logger.LogMessage("Synchronizacja profilu z ClassicUO...");
-
                 try
                 {
-                    // A. Wczytujemy dane z naszego profilu
-                    string rawProfileJson = File.ReadAllText(_selectedProfilePath);
-                    var mySettings = JsonConvert.DeserializeObject<SettingsModel>(rawProfileJson);
-
-                    if (mySettings == null)
-                    {
-                        _logger.LogMessage("BŁĄD: Nie udało się odczytać profilu.");
-                        SetUIEnabled(true);
-                        PlayButton.Content = "URUCHOM GRĘ";
-                        return;
-                    }
-
-                    // 1. Deszyfrowanie hasła
                     string decryptedPass = PasswordVault.Decrypt(mySettings.Password);
                     string passForGame = PasswordVault.ToClassicUOPassword(decryptedPass);
 
-                    // B. Edytujemy settings.json gry
                     if (File.Exists(gameSettingsPath))
                     {
                         var gameJsonRaw = File.ReadAllText(gameSettingsPath);
                         JObject gameConfig = JObject.Parse(gameJsonRaw);
 
-                        // --- LOGIKA WSTRZYKIWANIA ---
+                        // --- PODSTAWOWE ---
                         gameConfig["username"] = mySettings.Username;
                         gameConfig["password"] = passForGame;
-                        gameConfig["ultimaonlinedirectory"] = mySettings.UltimaOnlineDirectory;
                         gameConfig["autologin"] = mySettings.Autologin;
                         gameConfig["reconnect"] = mySettings.Reconnect;
                         gameConfig["login_music"] = mySettings.LoginMusic;
                         gameConfig["login_music_volume"] = mySettings.LoginMusicVolume;
 
-                        // SPRAWDZENIE FLAGI DEV: Jeśli profil to DEV, nie nadpisujemy IP, Portu, Ścieżki i wersji klienta
+                        // --- PLUGINY (NOWOŚĆ) ---
+                        if (mySettings.Plugins != null)
+                        {
+                            gameConfig["plugins"] = JArray.FromObject(mySettings.Plugins);
+                        }
+
+                        // --- LOGIKA DEV ---
                         if (mySettings.IsDev)
                         {
-                            _logger.LogMessage("Tryb DEV: Pomijanie synchronizacji IP, Portu, Ścieżki i wersji klienta (zachowano ustawienia lokalne).");
+                            _logger.LogMessage("Tryb DEV: Pominięto IP/Port/Wersję.");
                         }
                         else
                         {
                             gameConfig["ip"] = mySettings.Ip;
                             gameConfig["port"] = mySettings.Port;
                             gameConfig["ultimaonlinedirectory"] = mySettings.UltimaOnlineDirectory;
-                            gameConfig["client_version"] = mySettings.ClientVersion;
+                            gameConfig["clientversion"] = mySettings.ClientVersion; // Poprawiłem literówkę z client_version na clientversion
                         }
-                        // ----------------------------
 
-                        // C. Zapisujemy zmiany na dysk gry
                         File.WriteAllText(gameSettingsPath, gameConfig.ToString(Formatting.Indented));
                         _logger.LogMessage("Ustawienia zsynchronizowane.");
                     }
-                    else 
-                    {
-                        _logger.LogMessage("BŁĄD: Nie znaleziono pliku settings.json w folderze ClassicUO!");
-                    }
                 }
-                catch (Exception ex)
-                {
-                    _logger.LogMessage($"Błąd synchronizacji JSON: {ex.Message}");
-                }
+                catch (Exception ex) { _logger.LogMessage($"Błąd synchronizacji: {ex.Message}"); }
 
-                // 5. Start gry
+                // 6. Start gry
                 _logger.LogMessage("Odpalanie ClassicUO...");
                 Process.Start(new ProcessStartInfo
                 {
@@ -351,14 +339,12 @@ namespace AktualizatorEME
                     UseShellExecute = true
                 });
 
-                // Krótka pauza przed zamknięciem launchera
                 await Task.Delay(3000);
                 Application.Current.Shutdown();
             }
             catch (Exception ex)
             {
                 _logger.LogMessage($"Błąd krytyczny: {ex.Message}");
-                MessageBox.Show($"Wystąpił błąd: {ex.Message}");
                 SetUIEnabled(true);
                 PlayButton.Content = "URUCHOM GRĘ";
             }

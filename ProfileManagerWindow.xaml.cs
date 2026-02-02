@@ -27,7 +27,8 @@ namespace AktualizatorEME
             var edit = new ProfileEditWindow();
             edit.Owner = this;
             edit.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-            if (edit.ShowDialog() == true || true)
+            edit.ProfileNameBox.IsEnabled = true;
+            if (edit.ShowDialog() == true)
             {
                 LoadProfiles();
             }
@@ -171,8 +172,10 @@ namespace AktualizatorEME
                 edit.LoadProfileData(path);
             }
 
-            edit.ShowDialog();
-            LoadProfiles();
+            if (edit.ShowDialog() == true)
+            {
+                LoadProfiles();
+            }
         }
 
         private void DeleteProfile_Click(object sender, RoutedEventArgs e)

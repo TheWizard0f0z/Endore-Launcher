@@ -16,6 +16,7 @@ namespace AktualizatorEME.Services
         private readonly LoggerService _logger;
         private readonly ConfigurationService _configService;
         public bool SkipClassicUO { get; set; } = false;
+        public bool IsDevMode { get; set; } = false;
 
         // Konstruktor
         public UpdateService(LoggerService logger, ConfigurationService configService)
@@ -119,10 +120,7 @@ namespace AktualizatorEME.Services
             }
         }
 
-
-
-
-        private async Task<string?> GetFileHash(string filePath)
+        private async Task<string> GetFileHash(string filePath)
         {
             try
             {
@@ -137,8 +135,7 @@ namespace AktualizatorEME.Services
                 return null; // Możesz zwrócić null lub pusty string, aby uniknąć ostrzeżeń o wartości null
             }
         }
-
-
+        
         private string LoadSettings(string gamePath)
         {
             var settingsPath = Path.Combine(gamePath, "ClassicUO", "settings.json");
@@ -219,20 +216,27 @@ namespace AktualizatorEME.Services
                             {
                                 if (!File.Exists(settingsFilePath))
                                 {
-                                    // Jeśli plik settings.json nie istnieje, skopiuj go w całości
                                     File.Copy(tempSettingsPath, settingsFilePath, true);
-                                    _logger.LogMessage("Plik settings.json nie istniał, został skopiowany w całości.");
                                 }
                                 else
                                 {
-                                    // Załaduj zawartość aktualnych i tymczasowych ustawień jako dynamiczne słowniki
                                     var currentSettings = JsonSerializer.Deserialize<Dictionary<string, object>>(File.ReadAllText(settingsFilePath));
                                     var tempSettings = JsonSerializer.Deserialize<Dictionary<string, object>>(File.ReadAllText(tempSettingsPath));
 
                                     if (currentSettings != null && tempSettings != null)
                                     {
-                                        // Edytuj tylko wybrane klucze
-                                        foreach (var key in new[] { "ip", "port", "clientversion", "last_server_name", "lastservernum" })
+                                        // LISTA POLA DO AKTUALIZACJI
+                                        var keysToUpdate = new List<string> { "last_server_name", "lastservernum" };
+
+                                        // Jeśli NIE jesteśmy w trybie DEV, pozwalamy serwerowi nadpisać parametry połączenia
+                                        if (!IsDevMode)
+                                        {
+                                            keysToUpdate.Add("ip");
+                                            keysToUpdate.Add("port");
+                                            keysToUpdate.Add("clientversion");
+                                        }
+
+                                        foreach (var key in keysToUpdate)
                                         {
                                             if (tempSettings.ContainsKey(key))
                                             {
@@ -240,23 +244,14 @@ namespace AktualizatorEME.Services
                                             }
                                         }
 
-                                        // Zapisz zmodyfikowane ustawienia
                                         File.WriteAllText(settingsFilePath, JsonSerializer.Serialize(currentSettings, new JsonSerializerOptions { WriteIndented = true }));
-                                        _logger.LogMessage("Zaktualizowano wybrane elementy w settings.json");
+                                        _logger.LogMessage(IsDevMode ? "Synchronizacja zakończona (Parametry IP/Port/Wersja zachowane - tryb DEV)" : "Zsynchronizowano parametry serwera w settings.json");
                                     }
                                 }
                             }
-                            else
-                            {
-                                _logger.LogMessage("Nie znaleziono tymczasowego pliku settings.json do nadpisania.");
-                            }
                         }
-                        catch (Exception ex)
-                        {
-                            _logger.LogMessage($"Błąd podczas aktualizacji settings.json: {ex.Message}");
-                        }
-
-                        continue; // Pomija dalsze kopiowanie settings.json
+                        catch (Exception ex) { _logger.LogMessage($"Błąd synchronizacji settings.json: {ex.Message}"); }
+                        continue; 
                     }
 
                     // Ochrona plików w chronionym folderze
@@ -296,8 +291,6 @@ namespace AktualizatorEME.Services
                 }
             }
         }
-
-
 
         private async Task RemoveLocalFilesNotOnServer(string baseDir)
         {

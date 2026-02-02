@@ -120,7 +120,8 @@ namespace AktualizatorEME
 
         private async void UpdateButton_Click(object sender, RoutedEventArgs e)
         {
-            // --- NOWA LOGIKA BLOKADY DEV ---
+            // 1. Sprawdzamy profil i ustawiamy flagę ochronną w serwisie
+            bool isDev = false;
             if (!string.IsNullOrEmpty(_selectedProfilePath) && File.Exists(_selectedProfilePath))
             {
                 try 
@@ -129,13 +130,16 @@ namespace AktualizatorEME
                     var settings = JsonConvert.DeserializeObject<SettingsModel>(json);
                     if (settings != null && settings.IsDev)
                     {
-                        _logger.LogMessage("Tryb DEV: Aktualizacja plików zablokowana dla tego profilu.");
-                        MessageBox.Show("Profil deweloperski ma zablokowaną automatyczną aktualizację plików, aby chronić Twoje zmiany w wersji klienta.", "Aktualizacja pominięta", MessageBoxButton.OK, MessageBoxImage.Information);
-                        return;
+                        isDev = true;
+                        _logger.LogMessage("Tryb DEV aktywny: Synchronizacja plików będzie chronić Twoje IP/Port/Wersję.");
                     }
                 } catch { }
             }
-            
+
+            // Przekazujemy informację o trybie DEV do serwisu aktualizacji
+            _updateService.IsDevMode = isDev;
+
+            // 2. Przygotowanie UI
             SetUIEnabled(false);
             UpdateProgressBar.Value = 0;
             ProgressPercentage.Text = "0%";
@@ -145,12 +149,16 @@ namespace AktualizatorEME
                 ProgressPercentage.Text = $"{Math.Round(value * 100)}%";
             });
 
-            try {
+            try 
+            {
+                // 3. Uruchomienie aktualizacji
                 _updateService.SkipClassicUO = SkipClassicUOCheckBox.IsChecked ?? false;
+        
                 await _updateService.UpdateFiles(progress);
+        
                 ProgressPercentage.Text = "100% Gotowe!";
 
-                // Pytanie o skrót (tylko raz)
+                // 4. Pytanie o skrót (tylko raz w historii aplikacji)
                 if (!_configService.ShortcutCreated)
                 {
                     var result = MessageBox.Show(
@@ -163,11 +171,13 @@ namespace AktualizatorEME
                     _configService.ShortcutCreated = true;
                 }
             }
-            catch (Exception ex) {
+            catch (Exception ex) 
+            {
                 _logger.LogMessage($"Błąd: {ex.Message}");
                 ProgressPercentage.Text = "Błąd!";
             }
-            finally {
+            finally 
+            {
                 SetUIEnabled(true);
             }
         }

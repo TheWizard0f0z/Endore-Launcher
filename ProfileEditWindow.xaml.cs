@@ -186,7 +186,7 @@ namespace AktualizatorEME
 
                 File.WriteAllText(filePath, json);
                 MessageBox.Show("Profil zapisany!", "Sukces", MessageBoxButton.OK, MessageBoxImage.Information);
-                Close();
+                this.DialogResult = true;
             }
             catch (Exception ex) { MessageBox.Show($"Błąd zapisu: {ex.Message}"); }
         }

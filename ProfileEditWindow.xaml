@@ -51,17 +51,32 @@
                     </Grid>
                     <Button Grid.Column="1" Content="PRZEGLĄDAJ" Width="100" Margin="5,0,0,0" Click="BrowsePath_Click"/>
                 </Grid>
-                <!--
-                Grid Margin="0,0,0,10">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBox x:Name="ClassicUOPathBox" Text="C:\Gry\Endore\ClassicUO" Background="#222" Foreground="White" Height="25" VerticalContentAlignment="Center" Padding="2,0"/>
-                    <Button Grid.Column="1" Content="PRZEGLĄDAJ" Width="100" Margin="5,0,0,0" Click="BrowseCUOExe_Click"/>
-                </Grid>
-                -->
-                <TextBlock x:Name="ClientVersionText" Text="Wersja klienta: 7.0.40.0" Foreground="#555" Margin="0,0,0,15"/>
+               
+                <StackPanel Margin="0,0,0,15">
+                    <TextBlock Text="Wersja klienta:" Foreground="#888888" Margin="0,0,0,5"/>
+                    <TextBox x:Name="ClientVersionBox" 
+                            Text="" 
+                            Background="#222" 
+                            Height="25" 
+                            VerticalContentAlignment="Center" 
+                            Padding="2,0"
+                            IsEnabled="{Binding IsChecked, ElementName=DevModeCheck}">
+                        <TextBox.Style>
+                            <Style TargetType="TextBox">
+                                <Setter Property="Foreground" Value="LimeGreen"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsEnabled" Value="True">
+                                        <Setter Property="Foreground" Value="White"/>
+                                    </Trigger>
+                                    <Trigger Property="IsEnabled" Value="False">
+                                        <Setter Property="Foreground" Value="LimeGreen"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBox.Style>
+                    </TextBox>
+                </StackPanel>
 
                 <TextBlock Text="3. POŁĄCZENIE Z SERWEREM" Foreground="#ff7e00" FontWeight="Bold" Margin="0,0,0,5"/>
                 <UniformGrid Columns="2" Margin="0,0,0,10">

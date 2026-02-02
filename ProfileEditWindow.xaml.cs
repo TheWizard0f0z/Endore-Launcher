@@ -19,6 +19,9 @@ namespace AktualizatorEME
             {
                 if (!File.Exists(filePath)) return;
 
+                // Czyścimy pole wersji przed wczytaniem
+                ClientVersionBox.Text = "";
+
                 string json = File.ReadAllText(filePath);
                 var settings = JsonConvert.DeserializeObject<SettingsModel>(json);
 
@@ -26,12 +29,24 @@ namespace AktualizatorEME
                 {
                     // Wypełniamy pola danymi z JSONa
                     ProfileNameBox.Text = Path.GetFileNameWithoutExtension(filePath);
+                    
                     LoginBox.Text = settings.Username;
-            
-                    // Hasło deszyfrujemy
-                    PassBox.Password = PasswordVault.Decrypt(settings.Password);
-            
+                    PassBox.Password = PasswordVault.Decrypt(settings.Password); // Hasło deszyfrujemy
+                    ClientVersionBox.Text = settings.ClientVersion;
+
                     PathBox.Text = settings.UltimaOnlineDirectory;
+
+                    // WYMUSZENIE AKTUALIZACJI WERSJI Z PLIKÓW GRY
+                    if (!string.IsNullOrEmpty(settings.UltimaOnlineDirectory))
+                    {
+                        UpdateClientVersionFromGameFiles(settings.UltimaOnlineDirectory);
+                    }
+                    else
+                    {
+                        // Jeśli w profilu nie ma ścieżki, weź wersję zapisaną w JSON profilu
+                        ClientVersionBox.Text = settings.ClientVersion;
+                    }
+
                     IpBox.Text = settings.Ip;
                     PortBox.Text = settings.Port.ToString();
             
@@ -64,36 +79,9 @@ namespace AktualizatorEME
                 string mainPath = dialog.FileName;
                 PathBox.Text = mainPath;
 
-                // Automat szukający ClassicUO.exe
-                string expectedCUOPath = Path.Combine(mainPath, "ClassicUO", "ClassicUO.exe");
-                /*
-                if (File.Exists(expectedCUOPath))
-                {
-                    ClassicUOPathBox.Text = expectedCUOPath;
-                }
-                else
-                {
-                    MessageBox.Show("Ustawiono folder główny, ale nie odnaleziono automatycznie ClassicUO.exe w podfolderze \\ClassicUO\\.", "Informacja", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-                */
+                // AUTOMATYCZNA AKTUALIZACJA WERSJI - teraz wywoływana od razu po wyborze
+                UpdateClientVersionFromGameFiles(mainPath);
             }
-        }
-
-        private void BrowseCUOExe_Click(object sender, RoutedEventArgs e)
-        {
-            /*
-            var dialog = new CommonOpenFileDialog
-            {
-                IsFolderPicker = false,
-                Title = "Wybierz plik ClassicUO.exe",
-                Filters = { new CommonFileDialogFilter("Pliki wykonywalne", "*.exe") }
-            };
-
-            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
-            {
-                ClassicUOPathBox.Text = dialog.FileName;
-            }
-            */
         }
 
         // Gdy naciskasz przycisk - pokaż hasło
@@ -113,6 +101,30 @@ namespace AktualizatorEME
             ShowPassBtn.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(136, 136, 136)); // Wróć do szarego
         }
 
+        private void UpdateClientVersionFromGameFiles(string mainGamePath)
+        {
+            try
+            {
+                string settingsPath = Path.Combine(mainGamePath, "ClassicUO", "settings.json");
+                if (File.Exists(settingsPath))
+                {
+                    string jsonRaw = File.ReadAllText(settingsPath);
+                    // Dynamicznie parsujemy JSONa, żeby wyciągnąć tylko clientversion
+                    var gameSettings = Newtonsoft.Json.Linq.JObject.Parse(jsonRaw);
+            
+                    if (gameSettings["clientversion"] != null)
+                    {
+                        ClientVersionBox.Text = gameSettings["clientversion"].ToString();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Cichy błąd, żeby nie denerwować użytkownika przy wyborze folderu
+                System.Diagnostics.Debug.WriteLine($"Błąd odczytu wersji: {ex.Message}");
+            }
+        }
+
         private void Cancel_Click(object sender, RoutedEventArgs e) => Close();
 
         private void Save_Click(object sender, RoutedEventArgs e)
@@ -120,7 +132,6 @@ namespace AktualizatorEME
             try 
             {
                 string rawPass = PassBox.Password;
-                MessageBox.Show($"Zapisuję hasło: '{rawPass}' Długość: {rawPass.Length}");
                 
                 // Sprawdzamy czy Port jest liczbą, jeśli nie - dajemy domyślny 4003
                 if (!int.TryParse(PortBox.Text, out int portValue)) portValue = 4003;
@@ -132,7 +143,7 @@ namespace AktualizatorEME
                     Ip = IpBox.Text,
                     Port = portValue,
                     UltimaOnlineDirectory = PathBox.Text,
-                    ClientVersion = "7.0.40.0",
+                    ClientVersion = ClientVersionBox.Text,
                     Autologin = AutoLoginCheck.IsChecked ?? false,
                     Reconnect = ReconnectCheck.IsChecked ?? false,
                     LoginMusic = LoginMusicCheck.IsChecked ?? false,

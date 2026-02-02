@@ -135,7 +135,7 @@
                         <StackPanel VerticalAlignment="Center" Margin="10">
                             <TextBlock Text="AKTUALNY PROFIL" Foreground="#555555" FontSize="10" FontWeight="Bold"/>
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock x:Name="CurrentProfileName" Text="Profil Domyślny" Foreground="White" FontSize="16" FontWeight="Bold" VerticalAlignment="Center"/>
+                                <TextBlock x:Name="CurrentProfileName" Text="Wybierz profil..." Foreground="White" FontSize="16" FontWeight="Bold" VerticalAlignment="Center"/>
                                 <Border x:Name="DevBadge" 
                                         Background="Orange" 
                                         Width="35" Height="18" 

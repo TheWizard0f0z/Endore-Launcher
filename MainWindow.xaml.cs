@@ -49,6 +49,7 @@ namespace AktualizatorEME
             // Start systemów pobocznych
             LoadConfig();
             InitStatusTimer();
+            RestoreLastProfile();
         }
 
         // --- STATUS SERWERA ---
@@ -222,42 +223,72 @@ namespace AktualizatorEME
             var manager = new ProfileManagerWindow();
             manager.Owner = this;
             manager.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-    
-            // Pokazujemy okno jako Dialog (blokuje MainWindow do czasu zamknięcia)
+
             manager.ShowDialog();
 
-            // Po zamknięciu sprawdzamy, czy w Tagu jest nazwa profilu
+            // 1. Jeśli użytkownik wybrał nowy profil (kliknął "Wybierz" w managerze)
             if (manager.Tag != null)
             {
                 string chosenProfile = manager.Tag.ToString();
-        
-                // Aktualizujemy TextBlock w UI okna głównego
-                CurrentProfileName.Text = chosenProfile;
-                CurrentProfileName.Foreground = Brushes.LimeGreen; // Opcjonalnie: zmiana na zielony też tutaj
-        
-                // Zapisujemy ścieżkę do wybranego profilu, żeby przycisk GRAJ wiedział co odpalić
-                _selectedProfilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Profiles", $"{chosenProfile}.json");
-        
-                try 
-                {
-                    if (File.Exists(_selectedProfilePath))
-                    {
-                        string json = File.ReadAllText(_selectedProfilePath);
-                        var settings = JsonConvert.DeserializeObject<SettingsModel>(json);
-                
-                        // Pokazujemy lub chowamy pomarańczowy znaczek
-                        DevBadge.Visibility = (settings != null && settings.IsDev) 
-                                              ? Visibility.Visible 
-                                              : Visibility.Collapsed;
-                    }
-                }
-                catch 
-                {
-                    DevBadge.Visibility = Visibility.Collapsed;
-                }
-
+                _configService.LastProfileName = chosenProfile;
+                ApplyProfileUI(chosenProfile);
                 _logger.LogMessage($"Aktywowano profil: {chosenProfile}");
             }
+            else 
+            {
+                // 2. Jeśli zamknął okno bez wybierania (X lub Anuluj)
+                // Sprawdzamy, czy profil, który mieliśmy ustawiony, nadal istnieje
+                if (!string.IsNullOrEmpty(_configService.LastProfileName))
+                {
+                    string currentPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Profiles", $"{_configService.LastProfileName}.json");
+            
+                    if (!File.Exists(currentPath))
+                    {
+                        // Profil został usunięty wewnątrz managera!
+                        ClearCurrentProfile();
+                        _logger.LogMessage("Aktualny profil został usunięty. Zresetowano wybór.");
+                    }
+                }
+            }
+        }
+
+        // Pomocnicza metoda, żeby nie powtarzać kodu dla ustawiania UI
+        private void ApplyProfileUI(string profileName)
+        {
+            _selectedProfilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Profiles", $"{profileName}.json");
+            CurrentProfileName.Text = profileName;
+            CurrentProfileName.Foreground = Brushes.LimeGreen;
+
+            try
+            {
+                if (File.Exists(_selectedProfilePath))
+                {
+                    string json = File.ReadAllText(_selectedProfilePath);
+                    var settings = JsonConvert.DeserializeObject<SettingsModel>(json);
+                    DevBadge.Visibility = (settings != null && settings.IsDev) ? Visibility.Visible : Visibility.Collapsed;
+                }
+            }
+            catch { DevBadge.Visibility = Visibility.Collapsed; }
+        }
+
+        // Pomocnicza metoda do czyszczenia UI
+        private void ClearCurrentProfile()
+        {
+            _configService.LastProfileName = string.Empty;
+            _selectedProfilePath = string.Empty;
+            CurrentProfileName.Text = "Wybierz profil...";
+            CurrentProfileName.Foreground = Brushes.Gray;
+            DevBadge.Visibility = Visibility.Collapsed;
+        }
+
+        private void RestoreLastProfile()
+        {
+            string last = _configService.LastProfileName;
+            if (string.IsNullOrEmpty(last)) return;
+
+            string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Profiles", $"{last}.json");
+            if (File.Exists(path)) ApplyProfileUI(last);
+            else ClearCurrentProfile();
         }
 
         // --- URUCHAMIANIE GRY ---

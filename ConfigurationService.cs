@@ -92,11 +92,25 @@ namespace AktualizatorEME.Services
             }
         }
 
+        public string LastProfileName
+        {
+            get => _config?.LastProfileName ?? string.Empty;
+            set 
+            { 
+                if (_config != null) 
+                { 
+                    _config.LastProfileName = value; 
+                    SaveConfig(); 
+                } 
+            }
+        }
+
         // Wewnętrzna klasa reprezentująca strukturę pliku JSON
         private class Configuration
         {
             public string GamePath { get; set; } = string.Empty;
             public bool ShortcutCreated { get; set; } = false;
+            public string LastProfileName { get; set; } = string.Empty;
         }
     }
 }

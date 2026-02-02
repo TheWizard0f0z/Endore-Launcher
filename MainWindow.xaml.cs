@@ -120,6 +120,22 @@ namespace AktualizatorEME
 
         private async void UpdateButton_Click(object sender, RoutedEventArgs e)
         {
+            // --- NOWA LOGIKA BLOKADY DEV ---
+            if (!string.IsNullOrEmpty(_selectedProfilePath) && File.Exists(_selectedProfilePath))
+            {
+                try 
+                {
+                    var json = File.ReadAllText(_selectedProfilePath);
+                    var settings = JsonConvert.DeserializeObject<SettingsModel>(json);
+                    if (settings != null && settings.IsDev)
+                    {
+                        _logger.LogMessage("Tryb DEV: Aktualizacja plików zablokowana dla tego profilu.");
+                        MessageBox.Show("Profil deweloperski ma zablokowaną automatyczną aktualizację plików, aby chronić Twoje zmiany w wersji klienta.", "Aktualizacja pominięta", MessageBoxButton.OK, MessageBoxImage.Information);
+                        return;
+                    }
+                } catch { }
+            }
+            
             SetUIEnabled(false);
             UpdateProgressBar.Value = 0;
             ProgressPercentage.Text = "0%";
@@ -269,10 +285,8 @@ namespace AktualizatorEME
                         return;
                     }
 
-                    // 1. NAJPIERW deszyfrujemy hasło z formatu profilu (.json) do czystego tekstu
+                    // 1. Deszyfrowanie hasła
                     string decryptedPass = PasswordVault.Decrypt(mySettings.Password);
-
-                    // 2. POTEM zamieniamy czysty tekst na format HEX wymagany przez grę
                     string passForGame = PasswordVault.ToClassicUOPassword(decryptedPass);
 
                     // B. Edytujemy settings.json gry
@@ -281,16 +295,28 @@ namespace AktualizatorEME
                         var gameJsonRaw = File.ReadAllText(gameSettingsPath);
                         JObject gameConfig = JObject.Parse(gameJsonRaw);
 
-                        // Wstrzykujemy dane
+                        // --- LOGIKA WSTRZYKIWANIA ---
                         gameConfig["username"] = mySettings.Username;
-                        gameConfig["password"] = passForGame; // <--- Tutaj trafia HEX 1-XXXX
-                        gameConfig["ip"] = mySettings.Ip;
-                        gameConfig["port"] = mySettings.Port;
+                        gameConfig["password"] = passForGame;
                         gameConfig["ultimaonlinedirectory"] = mySettings.UltimaOnlineDirectory;
                         gameConfig["autologin"] = mySettings.Autologin;
                         gameConfig["reconnect"] = mySettings.Reconnect;
                         gameConfig["login_music"] = mySettings.LoginMusic;
                         gameConfig["login_music_volume"] = mySettings.LoginMusicVolume;
+
+                        // SPRAWDZENIE FLAGI DEV: Jeśli profil to DEV, nie nadpisujemy IP, Portu, Ścieżki i wersji klienta
+                        if (mySettings.IsDev)
+                        {
+                            _logger.LogMessage("Tryb DEV: Pomijanie synchronizacji IP, Portu, Ścieżki i wersji klienta (zachowano ustawienia lokalne).");
+                        }
+                        else
+                        {
+                            gameConfig["ip"] = mySettings.Ip;
+                            gameConfig["port"] = mySettings.Port;
+                            gameConfig["ultimaonlinedirectory"] = mySettings.UltimaOnlineDirectory;
+                            gameConfig["client_version"] = mySettings.ClientVersion;
+                        }
+                        // ----------------------------
 
                         // C. Zapisujemy zmiany na dysk gry
                         File.WriteAllText(gameSettingsPath, gameConfig.ToString(Formatting.Indented));
@@ -313,7 +339,7 @@ namespace AktualizatorEME
                     FileName = exePath,
                     WorkingDirectory = Path.GetDirectoryName(exePath),
                     UseShellExecute = true
-            });
+                });
 
                 // Krótka pauza przed zamknięciem launchera
                 await Task.Delay(3000);

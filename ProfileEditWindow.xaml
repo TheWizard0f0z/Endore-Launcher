@@ -9,7 +9,7 @@
             <StackPanel Margin="20">
                 <Grid Margin="0,0,0,10">
                     <TextBlock Text="EDYCJA PROFILU" Foreground="White" FontSize="20" FontWeight="Bold"/>
-                    <CheckBox x:Name="DevModeCheck" Content="DEVELOPER MODE" HorizontalAlignment="Right" Foreground="Orange" FontWeight="Bold" VerticalAlignment="Center"/>
+                    <CheckBox x:Name="DevModeCheck" Content="DEVELOPER MODE" HorizontalAlignment="Right" Foreground="Orange" FontWeight="Bold" VerticalAlignment="Center" PreviewMouseLeftButtonDown="DevModeCheck_PreviewMouseLeftButtonDown"/>
                 </Grid>
 
                 <TextBlock Text="1. INFORMACJE" Foreground="#ff7e00" FontWeight="Bold" Margin="0,0,0,5"/>

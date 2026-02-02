@@ -3,6 +3,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using Newtonsoft.Json;
 
 namespace AktualizatorEME
 {
@@ -35,7 +36,7 @@ namespace AktualizatorEME
         public void LoadProfiles()
         {
             ProfilesList.Children.Clear();
-            lastSelectedTextBlock = null; // Resetujemy przy przeładowaniu listy
+            lastSelectedTextBlock = null;
 
             if (!Directory.Exists(profilesPath))
                 Directory.CreateDirectory(profilesPath);
@@ -45,11 +46,23 @@ namespace AktualizatorEME
             foreach (var file in files)
             {
                 var profileName = Path.GetFileNameWithoutExtension(file);
-                AddProfileTile(profileName, file);
+        
+                // --- NOWA LOGIKA: Sprawdzanie czy profil jest DEV ---
+                bool isDev = false;
+                try 
+                {
+                    string json = File.ReadAllText(file);
+                    var settings = JsonConvert.DeserializeObject<SettingsModel>(json);
+                    if (settings != null) isDev = settings.IsDev;
+                }
+                catch { /* ignorujemy błędy odczytu pojedynczych plików */ }
+                // ----------------------------------------------------
+
+                AddProfileTile(profileName, file, isDev);
             }
         }
 
-        private void AddProfileTile(string name, string filePath)
+        private void AddProfileTile(string name, string filePath, bool isDev)
         {
             Border card = new Border
             {
@@ -61,8 +74,7 @@ namespace AktualizatorEME
             };
 
             Grid grid = new Grid();
-            
-            // Tworzymy TextBlock dla nazwy
+    
             TextBlock txt = new TextBlock
             {
                 Text = name,
@@ -73,7 +85,33 @@ namespace AktualizatorEME
 
             StackPanel btnStack = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
 
-            // Przycisk WYBIERZ - teraz przekazuje też TextBlock do metody
+            // --- NOWA LOGIKA: Dodanie kafelka DEV ---
+            if (isDev)
+            {
+                Border devBadge = new Border
+                {
+                    Background = Brushes.Orange,
+                    Width = 40,
+                    Height = 25, // Identyczna wielkość jak przyciski (zakładając standard WPF)
+                    Margin = new Thickness(0, 0, 5, 0),
+                    CornerRadius = new CornerRadius(2),
+                    VerticalAlignment = VerticalAlignment.Center
+                };
+
+                devBadge.Child = new TextBlock
+                {
+                    Text = "DEV",
+                    Foreground = Brushes.Black,
+                    FontWeight = FontWeights.Bold,
+                    FontSize = 10,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center
+                };
+
+                btnStack.Children.Add(devBadge);
+            }
+            // ----------------------------------------
+
             Button btnSelect = new Button { Content = "WYBIERZ", Width = 60, Margin = new Thickness(5, 0, 5, 0), Tag = filePath };
             btnSelect.Click += (s, e) => {
                 SelectProfile_Logic(txt, filePath);

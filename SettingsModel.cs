@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace AktualizatorEME
@@ -35,5 +34,9 @@ namespace AktualizatorEME
 
         [JsonProperty("login_music_volume")]
         public int LoginMusicVolume { get; set; } = 50;
+
+        // NOWE: Flaga określająca czy profil był tworzony w trybie dewelopera
+        [JsonProperty("is_dev")]
+        public bool IsDev { get; set; } = false;
     }
 }

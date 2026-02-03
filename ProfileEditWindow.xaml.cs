@@ -163,15 +163,25 @@ namespace AktualizatorEME
             var dialog = new CommonOpenFileDialog
             {
                 IsFolderPicker = false,
-                Title = "Wybierz plik wykonywalny pluginu",
-                InitialDirectory = string.IsNullOrEmpty(PathBox.Text) ? "C:\\" : PathBox.Text
+                Title = "Wybierz plik wykonywalny pluginu (.exe)",
+                InitialDirectory = string.IsNullOrEmpty(PathBox.Text) ? "C:\\" : PathBox.Text,
+                EnsureFileExists = true // Dodatkowe zabezpieczenie: plik musi istnieć
             };
+
+            // Filtr dla plików EXE
             dialog.Filters.Add(new CommonFileDialogFilter("Pliki wykonywalne", "*.exe"));
 
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
-                // Wpisujemy kompletną ścieżkę zwróconą przez dialog
-                PluginPathBox.Text = dialog.FileName;
+                // Sprawdzenie na wszelki wypadek, czy rozszerzenie to na pewno .exe
+                if (Path.GetExtension(dialog.FileName).ToLower() == ".exe")
+                {
+                    PluginPathBox.Text = dialog.FileName;
+                }
+                else
+                {
+                    MessageBox.Show("Wybrany plik nie jest programem (.exe).", "Błędny format", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
             }
         }
 
@@ -238,11 +248,18 @@ namespace AktualizatorEME
             if (string.IsNullOrWhiteSpace(PassBox.Password)) errors.Add("- Hasło");
             if (string.IsNullOrWhiteSpace(IpBox.Text)) errors.Add("- Adres serwera");
             if (string.IsNullOrWhiteSpace(PortBox.Text)) errors.Add("- Port");
+            if (!string.IsNullOrWhiteSpace(PluginPathBox.Text))
+            {
+                if (Path.GetExtension(PluginPathBox.Text).ToLower() != ".exe")
+                {
+                    errors.Add("- Plugin musi być plikiem .exe");
+                }
+            }
 
             if (errors.Count > 0)
             {
-                string message = "Aby zapisać profil, uzupełnij następujące pola:\n" + string.Join("\n", errors);
-                MessageBox.Show(message, "Brakujące dane", MessageBoxButton.OK, MessageBoxImage.Warning);
+                string message = "Aby zapisać profil, uzupełnij lub popraw następujące pola:\n" + string.Join("\n", errors);
+                MessageBox.Show(message, "Brakujące lub błędne dane", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return false;
             }
 

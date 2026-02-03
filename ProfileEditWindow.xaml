@@ -4,6 +4,31 @@
         Title="Edycja Profilu" Height="650" Width="400" 
         WindowStyle="None" AllowsTransparency="True" Background="#111111">
     
+    <Window.Resources>
+        <Style x:Key="InfoButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="20"/>
+            <Setter Property="Height" Value="20"/>
+            <Setter Property="Background" Value="#333333"/>
+            <Setter Property="Foreground" Value="#888888"/>
+            <Setter Property="Cursor" Value="Help"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="2">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#444444"/>
+                    <Setter Property="Foreground" Value="White"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
     <Border BorderBrush="#333333" BorderThickness="1">
         <ScrollViewer VerticalScrollBarVisibility="Auto">
             <StackPanel Margin="20">
@@ -80,35 +105,60 @@
 
                 <TextBlock Text="3. POŁĄCZENIE Z SERWEREM" Foreground="#ff7e00" FontWeight="Bold" Margin="0,0,0,5"/>
                 <UniformGrid Columns="2" Margin="0,0,0,10">
-                    <StackPanel Margin="0,0,5,0">
-                        <TextBlock Text="Login:" Foreground="#888888"/>
-                        <TextBox x:Name="LoginBox" Background="#222" Foreground="White" Margin="0,5,0,15" Height="25" VerticalContentAlignment="Center" Padding="2,0"/>
-                    </StackPanel>
-                    <StackPanel Margin="5,0,0,0">
-                        <TextBlock Text="Hasło:" Foreground="#888888"/>
-                        <Grid Height="25" Margin="0,5,0,15">
-                            <PasswordBox x:Name="PassBox" Background="#222" Foreground="White" Height="25" VerticalContentAlignment="Center" Padding="2,0,30,0"/>
-                            <TextBox x:Name="PassVisibleBox" Background="#222" Foreground="White" Height="25" VerticalContentAlignment="Center" Padding="2,0,30,0" Visibility="Collapsed"/>
-                            <Button x:Name="ShowPassBtn" Content="👁" 
-                                    Width="20" Height="20" 
-                                    HorizontalAlignment="Right"
-                                    VerticalAlignment="Center"
-                                    Margin="0,0,5,0"
-                                    Background="Transparent" BorderThickness="0" 
-                                    Foreground="#888888" Cursor="Hand"
-                                    PreviewMouseDown="ShowPassBtn_PreviewMouseDown" 
-                                    PreviewMouseUp="ShowPassBtn_PreviewMouseUp">
-                                <Button.Template>
-                                    <ControlTemplate TargetType="Button">
-                                        <Border Background="{TemplateBinding Background}">
-                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                        </Border>
-                                    </ControlTemplate>
-                                </Button.Template>
+                    <StackPanel Margin="0,0,0,0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="10"/> <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="1" Text="Login:" Foreground="#888888" Margin="15,0,0,0"/>
+                        </Grid>
+        
+                        <Grid Margin="0,5,0,15">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Button Grid.Column="0" Content="i" Style="{StaticResource InfoButtonStyle}" 
+                                    Margin="0,0,5,0" VerticalAlignment="Center">
+                                <Button.ToolTip>
+                                    <ToolTip MaxWidth="300">
+                                        <TextBlock Text="Jeśli nie posiadasz konta na serwerze, wpisz tutaj dowolny login i hasło, a konto zostanie utworzone automatycznie podczas pierwszego logowania. W kreatorze postaci wymagane będzie potwierdzenie hasła do konta. Hasło może zawierać maksymalnie 10 znaków i może składać się wyłącznie z liter oraz cyfr." 
+                                                   TextWrapping="Wrap"/>
+                                    </ToolTip>
+                                </Button.ToolTip>
                             </Button>
+                            <TextBox x:Name="LoginBox" Grid.Column="1" Background="#222" Foreground="White" 
+                                     Height="25" VerticalContentAlignment="Center" Padding="2,0"/>
+                        </Grid>
+                    </StackPanel>
+
+                    <StackPanel Margin="0,0,0,0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="10"/> <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="1" Text="Hasło:" Foreground="#888888"/>
+                        </Grid>
+        
+                        <Grid Margin="0,5,0,15">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="10"/> <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid Grid.Column="1" Height="25">
+                                <PasswordBox x:Name="PassBox" Background="#222" Foreground="White" Height="25" VerticalContentAlignment="Center" Padding="2,0,30,0"/>
+                                <TextBox x:Name="PassVisibleBox" Background="#222" Foreground="White" Height="25" VerticalContentAlignment="Center" Padding="2,0,30,0" Visibility="Collapsed"/>
+                                <Button x:Name="ShowPassBtn" Content="👁" Width="20" Height="20" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,5,0" Background="Transparent" BorderThickness="0" Foreground="#888888" Cursor="Hand" PreviewMouseDown="ShowPassBtn_PreviewMouseDown" PreviewMouseUp="ShowPassBtn_PreviewMouseUp">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                            </Grid>
                         </Grid>
                     </StackPanel>
                 </UniformGrid>
+                
                 <Grid Margin="0,0,0,10">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="3*"/>
@@ -131,7 +181,7 @@
                     <CheckBox x:Name="SkipLoginCheck" Content="Pomiń ekran logowania" Foreground="White" Margin="0,0,0,5"/>
                     <CheckBox x:Name="AutoLoginCheck" Content="Automatyczne logowanie" Foreground="White"/>
                     <CheckBox x:Name="ReconnectCheck" Content="Auto. ponawianie połączenia" Foreground="White" Margin="0,0,0,5"/>
-                    <CheckBox x:Name="LoginMusicCheck" Content="Włącz muzykę ekranu logowania" Foreground="White"/>
+                    <CheckBox x:Name="LoginMusicCheck" Content="Włącz muzykę ekranu log." Foreground="White"/>
                 </UniformGrid>
                 <StackPanel Orientation="Horizontal" Margin="0,15,0,5">
                     <TextBlock Text="Głośność muzyki" Foreground="#888888"/>
@@ -142,29 +192,41 @@
                 </StackPanel>
                 <Slider x:Name="MusicSlider" Minimum="0" Maximum="100" Value="50" IsSnapToTickEnabled="True" TickFrequency="1" Margin="0,0,0,20"/>
 
-                <TextBlock Text="5. PLUGINY (OPCJONALNE)" Foreground="#ff7e00" FontWeight="Bold" Margin="0,10,0,5"/>
-                <Grid Margin="0,0,0,15">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid Grid.Column="0">
-                        <TextBox x:Name="PluginPathBox" Background="#222" Foreground="White" Height="25" VerticalContentAlignment="Center" Padding="2,0"/>
-                        <TextBlock Text="Wybierz plik .exe pluginu (np. Razor)..." Foreground="#555" IsHitTestVisible="False" VerticalAlignment="Center" Margin="10,0,0,0">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Text, ElementName=PluginPathBox}" Value="">
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
+                <StackPanel Margin="0,10,0,15">
+                    <TextBlock Text="5. PLUGINY (OPCJONALNE)" Foreground="#ff7e00" FontWeight="Bold" Margin="0,0,0,5"/>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/> <ColumnDefinition Width="*"/>    <ColumnDefinition Width="Auto"/> </Grid.ColumnDefinitions>
+
+                        <Button Grid.Column="0" Content="i" Style="{StaticResource InfoButtonStyle}" 
+                                Margin="0,0,5,0" VerticalAlignment="Center">
+                            <Button.ToolTip>
+                                <ToolTip MaxWidth="300">
+                                    <TextBlock Text="Wybierz plik .exe zewnętrznego programu, który ma się uruchomić razem z grą. Polecany:&#x0a;...\ClassicUO\Data\Plugins\Razor\RazorEnhanced.exe" 
+                                               TextWrapping="Wrap"/>
+                                </ToolTip>
+                            </Button.ToolTip>
+                        </Button>
+                        <Grid Grid.Column="1">
+                            <TextBox x:Name="PluginPathBox" Background="#222" Foreground="White" Height="25" VerticalContentAlignment="Center" Padding="2,0"/>
+                            <TextBlock Text="Wybierz plik .exe pluginu (np. Razor)..." Foreground="#555" IsHitTestVisible="False" VerticalAlignment="Center" Margin="10,0,0,0">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Text, ElementName=PluginPathBox}" Value="">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Grid>
+
+                        <Button Grid.Column="2" Content="PRZEGLĄDAJ" Width="100" Margin="5,0,0,0" Click="BrowsePlugin_Click" Height="25"/>
                     </Grid>
-                    <Button Grid.Column="1" Content="PRZEGLĄDAJ" Width="100" Margin="5,0,0,0" Click="BrowsePlugin_Click"/>
-                </Grid>
+                </StackPanel>
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button Content="ANULUJ" Width="100" Margin="5,0" Click="Cancel_Click"/>

@@ -85,7 +85,7 @@
                     </Grid>
                     <Button Grid.Column="1" Content="PRZEGLĄDAJ" Width="100" Margin="5,0,0,0" Click="BrowsePath_Click"/>
                 </Grid>
-                <StackPanel Margin="0,0,0,15">
+                <StackPanel Margin="0,0,0,10">
                     <TextBlock Text="Wersja klienta:" Foreground="#888888" Margin="0,0,0,5"/>
                     <TextBox x:Name="ClientVersionBox" 
                             Text="" 
@@ -121,7 +121,7 @@
                             <TextBlock Grid.Column="1" Text="Login:" Foreground="#888888" Margin="15,0,0,0"/>
                         </Grid>
         
-                        <Grid Margin="0,5,0,15">
+                        <Grid Margin="0,5,0,10">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
@@ -148,7 +148,7 @@
                             <TextBlock Grid.Column="1" Text="Hasło:" Foreground="#888888"/>
                         </Grid>
         
-                        <Grid Margin="0,5,0,15">
+                        <Grid Margin="0,5,0,10">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="10"/> <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
@@ -174,12 +174,12 @@
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Margin="0,0,5,0">
                         <TextBlock Text="Adres serwera:" Foreground="#888888"/>
-                        <TextBox x:Name="IpBox" Text="server.endore.pl" Background="#222" Foreground="White" Margin="0,5,0,15" Height="25" VerticalContentAlignment="Center" Padding="2,0"  
+                        <TextBox x:Name="IpBox" Text="server.endore.pl" Background="#222" Foreground="White" Margin="0,5,0,10" Height="25" VerticalContentAlignment="Center" Padding="2,0"  
                                  IsEnabled="{Binding IsChecked, ElementName=DevModeCheck}"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1" Margin="5,0,0,0">
                         <TextBlock Text="Port:" Foreground="#888888"/>
-                        <TextBox x:Name="PortBox" Text="4003" Background="#222" Foreground="White" Margin="0,5,0,15" Height="25" VerticalContentAlignment="Center" Padding="2,0"
+                        <TextBox x:Name="PortBox" Text="4003" Background="#222" Foreground="White" Margin="0,5,0,10" Height="25" VerticalContentAlignment="Center" Padding="2,0"
                                  IsEnabled="{Binding IsChecked, ElementName=DevModeCheck}"/>
                     </StackPanel>
                 </Grid>
@@ -200,8 +200,8 @@
                 </StackPanel>
                 <Slider x:Name="MusicSlider" Minimum="0" Maximum="100" Value="50" IsSnapToTickEnabled="True" TickFrequency="1" Margin="0,0,0,20"/>
 
-                <StackPanel Margin="0,10,0,15">
-                    <TextBlock Text="5. PLUGINY (OPCJONALNE)" Foreground="#ff7e00" FontWeight="Bold" Margin="0,0,0,5"/>
+                <StackPanel Margin="0,0,0,10">
+                    <TextBlock Text="5. PLUGINY (OPCJONALNE)" Foreground="#ff7e00" FontWeight="Bold" Margin="0,0,0,10"/>
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -212,7 +212,7 @@
                         <Button Grid.Column="0" Content="i" Style="{StaticResource InfoButtonStyle}" Margin="0,0,5,0" VerticalAlignment="Center">
                             <Button.ToolTip>
                                 <ToolTip MaxWidth="300">
-                                    <TextBlock Text="Wybierz plik .exe zewnętrznego programu..." TextWrapping="Wrap"/>
+                                    <TextBlock Text="Wybierz plik .exe zewnętrznego programu, który ma się uruchomić razem z grą. Polecany:&#x0a;...\ClassicUO\Data\Plugins\Razor\RazorEnhanced.exe" TextWrapping="Wrap"/>
                                 </ToolTip>
                             </Button.ToolTip>
                         </Button>
@@ -242,7 +242,7 @@
                     </Grid>
                 </StackPanel>
 
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
                     <Button Content="ANULUJ" Width="100" Margin="5,0" Click="Cancel_Click"/>
                     <Button Content="ZAPISZ ZMIANY" Width="150" Margin="5,0" FontWeight="Bold" Click="Save_Click"/>
                 </StackPanel>

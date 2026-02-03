@@ -207,20 +207,20 @@ namespace AktualizatorEME
             PluginPathBox.Text = string.Empty;
         }
 
-        private void SkipLoginCheck_Checked(object sender, RoutedEventArgs e)
+        private void SkipLoginCheck_Checked(object sender, RoutedEventArgs e) // Funkcjonalność powiązania wyłączona
         {
             // 1. Automatycznie zaznacz Autologin
-            AutoLoginCheck.IsChecked = true;
+            // AutoLoginCheck.IsChecked = true;
             // 2. Zablokuj możliwość odznaczenia Autologinu
-            AutoLoginCheck.IsEnabled = false;
+            // AutoLoginCheck.IsEnabled = false;
         }
 
-        private void SkipLoginCheck_Unchecked(object sender, RoutedEventArgs e)
+        private void SkipLoginCheck_Unchecked(object sender, RoutedEventArgs e) // Funkcjonalność powiązania wyłączona
         {
             // 1. Odblokuj Autologin
-            AutoLoginCheck.IsEnabled = true;
+            // AutoLoginCheck.IsEnabled = true;
             // 2. Automatycznie odznacz Autologin (zgodnie z Twoim założeniem: odznaczenie Skip = odznaczenie Auto)
-            AutoLoginCheck.IsChecked = false;
+            // AutoLoginCheck.IsChecked = false;
         }
 
         private void AutoLoginCheck_Checked(object sender, RoutedEventArgs e)

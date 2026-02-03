@@ -153,8 +153,17 @@ namespace AktualizatorEME.Services
                 string newFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "updaterEME_new.exe");
                 string currentFilePath = Process.GetCurrentProcess().MainModule?.FileName ?? throw new InvalidOperationException("Nie można odnaleźć aktualnego pliku wykonywalnego.");
 
-                using var client = new WebClient();
-                await client.DownloadFileTaskAsync(downloadUrl, newFilePath);
+                using (var httpClient = new HttpClient())
+                {
+                    using (var response = await httpClient.GetAsync(downloadUrl))
+                    {
+                        response.EnsureSuccessStatusCode();
+                        using (var fs = new FileStream(newFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
+                        {
+                            await response.Content.CopyToAsync(fs);
+                        }
+                    }
+                }
 
                 // Zamiana plików i uruchomienie nowej wersji
                 await Task.Delay(1000);

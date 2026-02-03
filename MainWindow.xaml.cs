@@ -381,9 +381,19 @@ namespace AktualizatorEME
 
                 // 6. Start gry
                 _logger.LogMessage("Odpalanie ClassicUO...");
+
+                // Przygotowujemy argumenty
+                string arguments = "";
+                if (mySettings.SkipLoginScreen)
+                {
+                    arguments = "-skiploginscreen";
+                    _logger.LogMessage("Dodano parametr: -skiploginscreen");
+                }
+
                 Process.Start(new ProcessStartInfo
                 {
                     FileName = exePath,
+                    Arguments = arguments, // Tutaj przekazujemy nasz parametr
                     WorkingDirectory = Path.GetDirectoryName(exePath),
                     UseShellExecute = true
                 });

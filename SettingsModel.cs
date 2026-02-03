@@ -24,6 +24,9 @@ namespace AktualizatorEME
         [JsonProperty("clientversion")]
         public string ClientVersion { get; set; } = "7.0.40.0";
 
+        [JsonProperty("skip_login_screen")]
+        public bool SkipLoginScreen { get; set; } = false;
+
         [JsonProperty("autologin")]
         public bool Autologin { get; set; }
 

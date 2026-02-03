@@ -186,8 +186,10 @@
 
                 <TextBlock Text="4. OPCJE DODATKOWE" Foreground="#ff7e00" FontWeight="Bold" Margin="0,0,0,10"/>
                 <UniformGrid Columns="2">
-                    <CheckBox x:Name="SkipLoginCheck" Content="Pomiń ekran logowania" Foreground="White" Margin="0,0,0,5"/>
-                    <CheckBox x:Name="AutoLoginCheck" Content="Automatyczne logowanie" Foreground="White"/>
+                    <CheckBox x:Name="SkipLoginCheck" Content="Pomiń ekran logowania" Foreground="White" Margin="0,0,0,5"
+                              Checked="SkipLoginCheck_Checked" Unchecked="SkipLoginCheck_Unchecked"/>
+                    <CheckBox x:Name="AutoLoginCheck" Content="Automatyczne logowanie" Foreground="White"
+                              Checked="AutoLoginCheck_Checked"/>
                     <CheckBox x:Name="ReconnectCheck" Content="Auto. ponawianie połączenia" Foreground="White" Margin="0,0,0,5"/>
                     <CheckBox x:Name="LoginMusicCheck" Content="Włącz muzykę ekranu log." Foreground="White"/>
                 </UniformGrid>

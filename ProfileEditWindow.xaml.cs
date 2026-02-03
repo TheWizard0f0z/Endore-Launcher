@@ -185,6 +185,21 @@ namespace AktualizatorEME
             }
         }
 
+        private void ClearPath_Click(object sender, RoutedEventArgs e)
+        {
+            PathBox.Text = string.Empty;
+            // Opcjonalnie: możemy też wyczyścić wersję klienta, skoro ścieżka zniknęła
+            if (DevModeCheck.IsChecked == false)
+            {
+                ClientVersionBox.Text = string.Empty;
+            }
+        }
+
+        private void ClearPlugin_Click(object sender, RoutedEventArgs e)
+        {
+            PluginPathBox.Text = string.Empty;
+        }
+
         private void Cancel_Click(object sender, RoutedEventArgs e) => Close();
 
         private void Save_Click(object sender, RoutedEventArgs e)

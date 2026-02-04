@@ -75,28 +75,34 @@ namespace AktualizatorEME
             };
 
             Grid grid = new Grid();
-    
+
+            // 1. Tworzymy pionowy kontener na nazwę i ewentualny znaczek DEV
+            StackPanel nameContainer = new StackPanel 
+            { 
+                VerticalAlignment = VerticalAlignment.Center,
+                HorizontalAlignment = HorizontalAlignment.Left 
+            };
+
             TextBlock txt = new TextBlock
             {
                 Text = name,
                 Foreground = Brushes.White,
                 FontSize = 14,
-                VerticalAlignment = VerticalAlignment.Center
+                FontWeight = FontWeights.Bold // Opcjonalnie pogrubienie, by lepiej wyglądało
             };
+            nameContainer.Children.Add(txt);
 
-            StackPanel btnStack = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
-
-            // --- NOWA LOGIKA: Dodanie kafelka DEV ---
+            // 2. Jeśli profil to DEV, tworzymy badge i dodajemy go POD tekstem
             if (isDev)
             {
                 Border devBadge = new Border
                 {
                     Background = Brushes.Orange,
-                    Width = 40,
-                    Height = 25, // Identyczna wielkość jak przyciski (zakładając standard WPF)
-                    Margin = new Thickness(0, 0, 5, 0),
+                    Width = 35,
+                    Height = 16,
+                    Margin = new Thickness(0, 4, 0, 0), // Margines od góry, żeby nie dotykał nazwy
                     CornerRadius = new CornerRadius(2),
-                    VerticalAlignment = VerticalAlignment.Center
+                    HorizontalAlignment = HorizontalAlignment.Left
                 };
 
                 devBadge.Child = new TextBlock
@@ -104,34 +110,55 @@ namespace AktualizatorEME
                     Text = "DEV",
                     Foreground = Brushes.Black,
                     FontWeight = FontWeights.Bold,
-                    FontSize = 10,
+                    FontSize = 9,
                     HorizontalAlignment = HorizontalAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Center
                 };
 
-                btnStack.Children.Add(devBadge);
+                nameContainer.Children.Add(devBadge);
             }
-            // ----------------------------------------
 
-            Button btnSelect = new Button { Content = "WYBIERZ", Width = 60, Margin = new Thickness(5, 0, 5, 0), Tag = filePath };
-            btnSelect.Click += (s, e) => {
-                SelectProfile_Logic(txt, filePath);
-            };
+            // 3. Panel przycisków (Pionowy kontener główny dla przycisków)
+StackPanel mainBtnContainer = new StackPanel 
+{ 
+    HorizontalAlignment = HorizontalAlignment.Right, 
+    VerticalAlignment = VerticalAlignment.Center 
+};
 
-            Button btnEdit = new Button { Content = "EDYTUJ", Width = 60, Margin = new Thickness(5, 0, 5, 0), Tag = filePath };
-            btnEdit.Click += EditProfile_Click;
+// Górny rząd: WYBIERZ i EDYTUJ
+StackPanel topRow = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 5) };
 
-            Button btnDelete = new Button { Content = "USUŃ", Width = 60, Margin = new Thickness(5, 0, 5, 0), Foreground = Brushes.Red, Tag = filePath };
-            btnDelete.Click += DeleteProfile_Click;
+Button btnSelect = new Button { Content = "WYBIERZ", Width = 65, Height = 22, Margin = new Thickness(5, 0, 0, 0), Tag = filePath };
+btnSelect.Click += (s, e) => { SelectProfile_Logic(txt, filePath); };
 
-            btnStack.Children.Add(btnSelect);
-            btnStack.Children.Add(btnEdit);
-            btnStack.Children.Add(btnDelete);
+Button btnEdit = new Button { Content = "EDYTUJ", Width = 65, Height = 22, Margin = new Thickness(5, 0, 0, 0), Tag = filePath };
+btnEdit.Click += EditProfile_Click;
 
-            grid.Children.Add(txt);
-            grid.Children.Add(btnStack);
+topRow.Children.Add(btnSelect);
+topRow.Children.Add(btnEdit);
+
+// Dolny rząd: USUŃ (wyrównany do prawej)
+Button btnDelete = new Button 
+{ 
+    Content = "USUŃ", 
+    Width = 65, 
+    Height = 22,
+    Foreground = Brushes.Red, 
+    Tag = filePath,
+    HorizontalAlignment = HorizontalAlignment.Right,
+    Margin = new Thickness(5, 0, 0, 0)
+};
+btnDelete.Click += DeleteProfile_Click;
+
+// Składanie całości
+mainBtnContainer.Children.Add(topRow);
+mainBtnContainer.Children.Add(btnDelete);
+
+// 4. Dodajemy kontenery do głównego Grida
+grid.Children.Add(nameContainer);
+grid.Children.Add(mainBtnContainer);
+    
             card.Child = grid;
-
             ProfilesList.Children.Add(card);
         }
 

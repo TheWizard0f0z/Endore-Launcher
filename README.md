@@ -1,3 +1,5 @@
+# DEPRECATED DO NOT USE
+
 ## Developer Mode
 
 Launcher posiada tryb developerski służący wyłącznie do testów.
